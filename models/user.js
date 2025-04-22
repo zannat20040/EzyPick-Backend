@@ -1,97 +1,65 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
-const Address = require("./address");
-
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
-      minlength: [2, "Name must be at least 2 characters long"],
-      maxlength: [100, "Name cannot exceed 100 characters"],
+      required: true,
     },
+
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
-      match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
-      maxlength: [100, "Email cannot exceed 100 characters"],
     },
-    password: {
+
+    phone: {
       type: String,
-      // required: [true, 'Password is required'],
-      minlength: [6, "Password must be at least 6 characters long"],
-      required: function () {
-        return !this.isGoogleUser; // If it's a Google user, password is not required
-      },
     },
-    isGoogleUser: {
-      type: Boolean,
-      default: false,
+
+    address: {
+      type: String,
     },
+
     role: {
       type: String,
-      enum: ["buyer", "seller", "admin"],
-      default: "buyer",
+      enum: ["buyer", "seller"],
+      required: true,
     },
-    address: [Address.schema], // Reference to the Address model
-    phoneNumber: {
+
+    profile_img: {
       type: String,
-      validate: {
-        validator: function (v) {
-          return /^\d{10,15}$/.test(v);
-        },
-        message: "Please enter a valid phone number.",
-      },
+      default: "",
     },
-    photo: String,
-    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
-    cart: [
+
+    company_name: {
+      type: String,
+    },
+    company_logo: {
+      type: String,
+    },
+    company_email: {
+      type: String,
+    },
+    company_phone: {
+      type: String,
+    },
+    company_address: {
+      type: String,
+    },
+    documents: [
       {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-        quantity: { type: Number, required: true, min: 1 },
+        type: String,
       },
     ],
-    orders: [
-      {
-        orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
-        status: {
-          type: String,
-          enum: ["pending", "shipped", "delivered", "cancelled"],
-          default: "pending",
-        },
-        totalAmount: { type: Number, required: true },
-      },
-    ],
-    totalSell: { type: Number, default: 0 },
-    totalEarn: { type: Number, default: 0 },
-    totalExpense: { type: Number, default: 0 },
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
+    verification_status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
   },
   { timestamps: true }
 );
 
-// Hash the password before saving
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password") || this.isGoogleUser) return next();
+module.exports = mongoose.models.User || mongoose.model("User", userSchema);
 
-  // If password is undefined or empty, skip hashing
-  if (!this.password) {
-    return next(new Error("Password is required for non-Google users"));
-  }
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
-
-
-
-
-module.exports = mongoose.model("User", UserSchema);
