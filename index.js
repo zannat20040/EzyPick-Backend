@@ -6,6 +6,8 @@ const connectDB = require("./config/db");
 const PORT = process.env.PORT || 5000;
 const userRoutes = require("./routes/userRoutes");
 const deliveryOptionRoutes = require("./routes/deliveryOptionRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+
 
 app.use(express.json());
 app.use(
@@ -19,6 +21,8 @@ app.use(
 // Use user routes
 app.use("/api/users", userRoutes);
 app.use("/api", deliveryOptionRoutes);
+app.use("/api/categories", categoryRoutes);
+
 
 // Connect to MongoDB and start server
 const startServer = async () => {
