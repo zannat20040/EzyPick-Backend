@@ -52,4 +52,17 @@ const addNewProduct = async (req, res) => {
   }
 };
 
-module.exports = { addNewProduct };
+const getProductsWithOffers = async (req, res) => {
+    try {
+      const products = await Product.find({
+        offer: { $ne: "" } 
+      });
+      res.status(200).json(products);
+    } catch (err) {
+      console.error("Error fetching offer products:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+
+
+module.exports = { addNewProduct , getProductsWithOffers};
