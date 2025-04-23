@@ -9,6 +9,7 @@ const categorySchema = new mongoose.Schema({
   subcategory: {
     type: [String],
     default: [],
+    required: true,
   },
 }, { timestamps: true });
 
