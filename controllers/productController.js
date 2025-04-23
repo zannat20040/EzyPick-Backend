@@ -53,16 +53,25 @@ const addNewProduct = async (req, res) => {
 };
 
 const getProductsWithOffers = async (req, res) => {
-    try {
-      const products = await Product.find({
-        offer: { $ne: "" } 
-      });
-      res.status(200).json(products);
-    } catch (err) {
-      console.error("Error fetching offer products:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  };
+  try {
+    const products = await Product.find({
+      offer: { $ne: "" },
+    });
+    res.status(200).json(products);
+  } catch (err) {
+    console.error("Error fetching offer products:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find().populate("category"); // Optional: populate category details
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
-module.exports = { addNewProduct , getProductsWithOffers};
+module.exports = { addNewProduct, getProductsWithOffers, getAllProducts };

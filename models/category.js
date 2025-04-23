@@ -11,6 +11,11 @@ const categorySchema = new mongoose.Schema({
     default: [],
     required: true,
   },
+  thumbnail: {
+    type: String,
+    required: false, 
+    default: "",      
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.models.Category || mongoose.model("Category", categorySchema);

@@ -4,17 +4,21 @@ const Category = require("../models/category");
 const addCategory = async (req, res) => {
   const { category } = req.body;
 
-  if (!category) return res.status(400).json({ message: "Category is required." });
+  if (!category)
+    return res.status(400).json({ message: "Category is required." });
 
   try {
     const exists = await Category.findOne({ category });
-    if (exists) return res.status(409).json({ message: "Category already exists." });
+    if (exists)
+      return res.status(409).json({ message: "Category already exists." });
 
     const newCat = new Category({ category });
     await newCat.save();
     res.status(201).json({ message: "Category added", data: newCat });
   } catch (err) {
-    res.status(500).json({ message: "Failed to add category", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to add category", error: err.message });
   }
 };
 
@@ -22,7 +26,9 @@ const addCategory = async (req, res) => {
 const addSubcategory = async (req, res) => {
   const { category, title } = req.body;
   if (!category || !title) {
-    return res.status(400).json({ message: "Both category and subcategory are required." });
+    return res
+      .status(400)
+      .json({ message: "Both category and subcategory are required." });
   }
 
   try {
@@ -38,7 +44,9 @@ const addSubcategory = async (req, res) => {
 
     res.status(200).json({ message: "Subcategory added", data: cat });
   } catch (err) {
-    res.status(500).json({ message: "Failed to add subcategory", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to add subcategory", error: err.message });
   }
 };
 
@@ -46,9 +54,11 @@ const addSubcategory = async (req, res) => {
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find();
-    res.status(200).json({ data: categories });
+    res.status(200).json(  categories );
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch categories", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch categories", error: err.message });
   }
 };
 
@@ -62,13 +72,47 @@ const getSubcategoriesByCategory = async (req, res) => {
 
     res.status(200).json({ data: cat.subcategory });
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch subcategories", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch subcategories", error: err.message });
   }
 };
+
+// ✅ Update only the thumbnail of a category by ID
+const updateCategoryThumbnail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { thumbnail } = req.body;
+
+    if (!thumbnail) {
+      return res.status(400).json({ message: "Thumbnail is required." });
+    }
+
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      { thumbnail },
+      { new: true }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Category not found." });
+    }
+
+    res.status(200).json({
+      message: "Thumbnail updated successfully.",
+      category: updatedCategory
+    });
+  } catch (error) {
+    console.error("Error updating category thumbnail:", error);
+    res.status(500).json({ message: "Server error." });
+  }
+};
+
 
 module.exports = {
   addCategory,
   addSubcategory,
   getAllCategories,
   getSubcategoriesByCategory,
+  updateCategoryThumbnail
 };
