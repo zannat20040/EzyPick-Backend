@@ -15,6 +15,7 @@ const addNewProduct = async (req, res) => {
       category,
       specifications,
       postedBy,
+      sellerName,
     } = req.body;
 
     if (
@@ -24,6 +25,8 @@ const addNewProduct = async (req, res) => {
       !thumbnail ||
       !category?.title ||
       !category?.subcategory ||
+      !postedBy ||
+      !sellerName ||
       !postedBy
     ) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -42,6 +45,7 @@ const addNewProduct = async (req, res) => {
       category,
       specifications,
       postedBy,
+      sellerName
     });
 
     await product.save();
@@ -127,6 +131,22 @@ const getProductsByUser = async (req, res) => {
 };
 
 
+const deleteProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    const deleted = await Product.findByIdAndDelete(productId);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 module.exports = {
   addNewProduct,
@@ -134,5 +154,6 @@ module.exports = {
   getAllProducts,
   getSingleProduct,
   updateProduct,
-  getProductsByUser
+  getProductsByUser,
+  deleteProduct
 };
