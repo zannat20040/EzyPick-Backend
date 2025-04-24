@@ -44,7 +44,6 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-// ✅ Add to Wishlist
 const addToWishlist = async (req, res) => {
   const { email, productId } = req.body;
   if (!email || !productId) {
@@ -52,16 +51,41 @@ const addToWishlist = async (req, res) => {
   }
 
   try {
-    const user = await UserCart.findOneAndUpdate(
-      { email },
-      {
-        $addToSet: { wishlist: { productId } },
-      },
-      { upsert: true, new: true }
-    );
-    res.status(200).json({ message: "Added to wishlist", wishlist: user.wishlist });
+    // Check if the user already has this product in their wishlist
+    const user = await UserCart.findOne({ email });
+
+    if (user) {
+      const alreadyExists = user.wishlist.some(
+        (item) => item.productId.toString() === productId
+      );
+
+      if (alreadyExists) {
+        return res.status(400).json({ message: "Product already in wishlist" });
+      }
+
+      // Add new product to wishlist
+      user.wishlist.push({ productId });
+      await user.save();
+
+      return res
+        .status(200)
+        .json({ message: "Added to wishlist", wishlist: user.wishlist });
+    } else {
+      // Create new wishlist document for user
+      const newUser = await UserCart.create({
+        email,
+        wishlist: [{ productId }],
+      });
+
+      return res
+        .status(201)
+        .json({ message: "Wishlist created", wishlist: newUser.wishlist });
+    }
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Add to wishlist error:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 
@@ -80,7 +104,9 @@ const removeFromWishlist = async (req, res) => {
       },
       { new: true }
     );
-    res.status(200).json({ message: "Removed from wishlist", wishlist: user.wishlist });
+    res
+      .status(200)
+      .json({ message: "Removed from wishlist", wishlist: user.wishlist });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
