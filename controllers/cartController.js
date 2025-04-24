@@ -2,23 +2,41 @@ const UserCart = require("../models/userCart");
 
 // ✅ Add to Cart
 const addToCart = async (req, res) => {
-  const { email, productId, quantity = 1 } = req.body;
-  if (!email || !productId) {
-    return res.status(400).json({ message: "Missing email or productId" });
+  const { email, productId, username, quantity = 1 } = req.body;
+
+  if (!email || !productId || !username) {
+    return res
+      .status(400)
+      .json({ message: "Missing email, productId, or username" });
   }
 
   try {
-    const user = await UserCart.findOneAndUpdate(
-      { email },
-      {
-        $addToSet: {
-          cart: { productId, quantity },
-        },
-      },
-      { upsert: true, new: true }
-    );
+    let user = await UserCart.findOne({ email });
+
+    if (user) {
+      const alreadyInCart = user.cart.some(
+        (item) => item.productId.toString() === productId
+      );
+
+      if (alreadyInCart) {
+        return res.status(409).json({ message: "Product already in cart" });
+      }
+
+      // Add new product to cart
+      user.cart.push({ productId, quantity });
+      await user.save();
+    } else {
+      // New user with name and product
+      user = await UserCart.create({
+        email,
+        name: username,
+        cart: [{ productId, quantity }],
+      });
+    }
+
     res.status(200).json({ message: "Added to cart", cart: user.cart });
   } catch (err) {
+    console.error("Cart error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
@@ -73,7 +91,8 @@ const addToWishlist = async (req, res) => {
     } else {
       // Create new wishlist document for user
       const newUser = await UserCart.create({
-        email,username,
+        email,
+        username,
         wishlist: [{ productId }],
       });
 
