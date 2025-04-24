@@ -7,10 +7,9 @@ const userCartSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-     name: {
+    username: {
       type: String,
       required: true,
-      unique: true,
     },
     cart: [
       {
@@ -39,4 +38,5 @@ const userCartSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.models.UserCart || mongoose.model("UserCart", userCartSchema);
+module.exports =
+  mongoose.models.UserCart || mongoose.model("UserCart", userCartSchema);

@@ -45,7 +45,7 @@ const removeFromCart = async (req, res) => {
 };
 
 const addToWishlist = async (req, res) => {
-  const { email, productId } = req.body;
+  const { email, productId, username } = req.body;
   if (!email || !productId) {
     return res.status(400).json({ message: "Missing email or productId" });
   }
@@ -73,7 +73,7 @@ const addToWishlist = async (req, res) => {
     } else {
       // Create new wishlist document for user
       const newUser = await UserCart.create({
-        email,
+        email,username,
         wishlist: [{ productId }],
       });
 
