@@ -153,10 +153,60 @@ const getUserCartWishlist = async (req, res) => {
   }
 };
 
+const increaseCartQuantity = async (req, res) => {
+  const { email, productId, action } = req.body;
+
+  if (!email || !productId || !action) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  try {
+    const user = await UserCart.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const item = user.cart.find(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (!item) return res.status(404).json({ message: "Product not in cart" });
+
+    if (action === "increase") {
+      item.quantity += 1;
+    } else if (action === "decrease" && item.quantity > 1) {
+      item.quantity -= 1;
+    }
+
+    await user.save();
+    res.status(200).json({ message: "Cart updated", cart: user.cart });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+const checkCartItem = async (req, res) => {
+  const { email, productId } = req.query;
+
+  try {
+    const user = await UserCart.findOne({ email });
+    const exists = user?.cart.some(
+      (item) => item.productId.toString() === productId
+    );
+
+    res.status(200).json({ exists });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error checking cart", error: err.message });
+  }
+};
+
 module.exports = {
   addToCart,
   removeFromCart,
   addToWishlist,
   removeFromWishlist,
   getUserCartWishlist,
+  increaseCartQuantity,
+  checkCartItem,
 };
