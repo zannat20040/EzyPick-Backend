@@ -1,7 +1,7 @@
 const UserCart = require("../models/userCart");
 
 // ✅ Add to Cart
-const addToCart = async (req, res) => {
+const  addToCart = async (req, res) => {
   const { email, productId, username, quantity = 1 } = req.body;
 
   if (!email || !productId || !username) {
