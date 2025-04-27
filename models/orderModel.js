@@ -14,6 +14,11 @@ const orderItemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  quantity: {
+    type: Number,
+    required: true,
+    default: 1, // ✅ default 1 if not specified
+  },
   buyerName: String,
   buyerPhone: String,
   buyerAddress: String,

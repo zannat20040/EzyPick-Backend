@@ -16,6 +16,7 @@ const placeOrder = async (req, res) => {
       items: items.map((item) => ({
         productId: item.productId,
         requirement: item.requirement,
+        quantity: item.quantity,
         deliveryOption: item.deliveryOption,
         buyerName: item.buyerName,
         buyerPhone: item.buyerPhone,
@@ -101,6 +102,7 @@ const deleteOrder = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 module.exports = {
   placeOrder,
