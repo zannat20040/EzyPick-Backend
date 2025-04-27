@@ -29,7 +29,7 @@ const  addToCart = async (req, res) => {
       // New user with name and product
       user = await UserCart.create({
         email,
-        name: username,
+        username,
         cart: [{ productId, quantity }],
       });
     }

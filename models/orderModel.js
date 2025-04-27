@@ -17,12 +17,13 @@ const orderItemSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
-    default: 1, // ✅ default 1 if not specified
+    default: 1, // ✅ Important
   },
   buyerName: String,
   buyerPhone: String,
   buyerAddress: String,
 });
+
 
 const orderSchema = new mongoose.Schema(
   {

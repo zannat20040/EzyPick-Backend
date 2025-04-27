@@ -2,7 +2,7 @@ const Order = require("../models/orderModel");
 
 // ✅ Place a New Order
 const placeOrder = async (req, res) => {
-  const { name, phone, address, items } = req.body;
+  const { name, phone, address,email, items } = req.body;
 
   if (!name || !phone || !address || !items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ message: "Missing required fields or items" });
@@ -13,6 +13,7 @@ const placeOrder = async (req, res) => {
       buyerName: name,
       buyerPhone: phone,
       buyerAddress: address,
+      buyerEmail: email,
       items: items.map((item) => ({
         productId: item.productId,
         requirement: item.requirement,
@@ -103,6 +104,20 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+// In orderController.js
+const getOrdersByUserEmail = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const orders = await Order.find({ buyerEmail: email }).populate("items.productId");
+    res.status(200).json({ orders });
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 
 module.exports = {
   placeOrder,
@@ -110,4 +125,5 @@ module.exports = {
   getOrderById,
   updateOrder,
   deleteOrder,
+  getOrdersByUserEmail
 };
