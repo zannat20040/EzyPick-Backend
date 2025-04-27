@@ -18,6 +18,8 @@ const productSchema = new mongoose.Schema(
     specifications: mongoose.Schema.Types.Mixed,
     postedBy: { type: String, required: true },
     sellerName: { type: String, required: true },
+    rating: { type: Number, default: 0 },   // ⭐ average rating (e.g., 4.5)
+    reviews: { type: Number, default: 0 },  
   },
   {
     timestamps: true,

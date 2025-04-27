@@ -45,7 +45,7 @@ const addNewProduct = async (req, res) => {
       category,
       specifications,
       postedBy,
-      sellerName
+      sellerName,
     });
 
     await product.save();
@@ -130,7 +130,6 @@ const getProductsByUser = async (req, res) => {
   }
 };
 
-
 const deleteProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -148,6 +147,25 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const getProductsByCategory = async (req, res) => {
+  const { categoryName } = req.params;
+
+  try {
+    const products = await Product.find({ "category.title": categoryName });
+
+    if (!products.length) {
+      return res
+        .status(404)
+        .json({ message: "No products found for this category." });
+    }
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   addNewProduct,
   getProductsWithOffers,
@@ -155,5 +173,6 @@ module.exports = {
   getSingleProduct,
   updateProduct,
   getProductsByUser,
-  deleteProduct
+  deleteProduct,
+  getProductsByCategory,
 };

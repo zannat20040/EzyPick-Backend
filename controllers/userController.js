@@ -58,6 +58,7 @@ const registerUser = async (req, res) => {
       .status(201)
       .json({ message: "User registered successfully", user: newUser });
   } catch (err) {
+    console.log(err);
     res
       .status(500)
       .json({ message: "Failed to register user", error: err.message });
@@ -80,11 +81,52 @@ const getUserByEmail = async (req, res) => {
 
     res.status(200).json({ user });
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch user", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch user", error: err.message });
   }
 };
 
+// ✅ Get all sellers
+const getAllSellers = async (req, res) => {
+  try {
+    const sellers = await User.find({ role: "seller" }).sort({ createdAt: -1 }); // latest first
+    res.status(200).json(sellers);
+  } catch (error) {
+    console.error("Error fetching sellers:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+// in userController.js
+const updateSellerStatus = async (req, res) => {
+  const { sellerId } = req.params;
+  const { verification_status } = req.body;
+
+  if (!verification_status) {
+    return res.status(400).json({ message: "Status is required" });
+  }
+
+  try {
+    const seller = await User.findById(sellerId);
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    seller.verification_status = verification_status;
+    await seller.save();
+
+    res.status(200).json({ message: "Seller status updated successfully", seller });
+  } catch (error) {
+    console.error("Error updating seller status:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 module.exports = {
   registerUser,
-  getUserByEmail, 
+  getUserByEmail,
+  getAllSellers, 
+  updateSellerStatus
 };
+

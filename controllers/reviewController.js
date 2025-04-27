@@ -1,13 +1,15 @@
 const Review = require("../models/review");
+const Product = require("../models/product"); // <-- Import Product model
 
 // ✅ Create New Review
+
 const createReview = async (req, res) => {
   try {
     const {
       productId,
       userId,
       username,
-      userImage, // <-- new field
+      userImage,
       rating,
       reviewText,
       reviewTitle,
@@ -18,7 +20,7 @@ const createReview = async (req, res) => {
       productId,
       userId,
       username,
-      userImage, // <-- save the image
+      userImage,
       rating,
       reviewText,
       reviewTitle,
@@ -26,6 +28,21 @@ const createReview = async (req, res) => {
     });
 
     const savedReview = await newReview.save();
+
+    // ✅ After saving the review, update Product's average rating:
+    const allReviews = await Review.find({ productId });
+
+    const totalRatings = allReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    const avgRating = totalRatings / allReviews.length;
+
+    // ✅ Now update product model:
+    await Product.findByIdAndUpdate(productId, {
+      rating: avgRating.toFixed(1), // 1 decimal place, e.g., 4.5
+      reviews: allReviews.length, // Update number of reviews too (optional)
+    });
 
     res
       .status(201)
@@ -75,7 +92,6 @@ const addResponseToReview = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 
 const likeReview = async (req, res) => {
   const { reviewId } = req.params;
@@ -146,8 +162,6 @@ const dislikeReview = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
-
 
 module.exports = {
   createReview,
