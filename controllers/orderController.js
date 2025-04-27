@@ -165,6 +165,37 @@ const getOrdersBySellerEmail = async (req, res) => {
   }
 };
 
+const checkPurchase = async (req, res) => {
+  const { email, productId } = req.query;
+
+  try {
+    // Find orders for this user
+    const orders = await Order.find({ buyerEmail: email }).populate("items.productId");
+
+    let purchased = false;
+
+    for (const order of orders) {
+      for (const item of order.items) {
+        if (
+          item.productId &&
+          item.productId._id.toString() === productId.toString() &&
+          item.status === "accepted"
+        ) {
+          purchased = true;
+          break;
+        }
+      }
+      if (purchased) break;
+    }
+
+    res.status(200).json({ purchased });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 module.exports = {
   placeOrder,
   getAllOrders,
@@ -173,4 +204,5 @@ module.exports = {
   deleteOrder,
   getOrdersByUserEmail,
   getOrdersBySellerEmail,
+  checkPurchase
 };
