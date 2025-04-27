@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    buyerEmail: { // ✅ Add this
+      type: String,
+      required: true,
+    },
     items: [orderItemSchema],
     status: {
       type: String,
@@ -47,5 +51,6 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

@@ -6,7 +6,8 @@ const {
   getOrderById,
   updateOrder,
   deleteOrder,
-  getOrdersByUserEmail
+  getOrdersByUserEmail,
+  getOrdersBySellerEmail
 } = require("../controllers/orderController");
 
 // Place a new order
@@ -24,6 +25,7 @@ router.patch("/orders/:id", updateOrder);
 // Delete an order
 router.delete("/orders/:id", deleteOrder);
 router.get("/orders/user/:email", getOrdersByUserEmail);
+router.get("/orders/seller/:email", getOrdersBySellerEmail);
 
 
 module.exports = router;

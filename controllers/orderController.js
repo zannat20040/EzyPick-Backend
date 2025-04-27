@@ -117,6 +117,26 @@ const getOrdersByUserEmail = async (req, res) => {
   }
 };
 
+const getOrdersBySellerEmail = async (req, res) => {
+  const { email } = req.params; // Seller's email
+
+  try {
+    // Fetch all orders with product populated
+    const allOrders = await Order.find().populate("items.productId");
+
+    // Filter orders where at least one item belongs to the seller
+    const sellerOrders = allOrders.filter((order) => {
+      return order.items.some((item) => item.productId?.postedBy === email);
+    });
+
+    res.status(200).json({ orders: sellerOrders });
+  } catch (error) {
+    console.error("Error fetching seller orders:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 
 
 module.exports = {
@@ -125,5 +145,6 @@ module.exports = {
   getOrderById,
   updateOrder,
   deleteOrder,
-  getOrdersByUserEmail
+  getOrdersByUserEmail,
+  getOrdersBySellerEmail
 };
