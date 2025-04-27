@@ -24,6 +24,8 @@ const reviewSchema = new mongoose.Schema(
     notHelpfulCount: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
     dislikes: { type: Number, default: 0 },
+    likedBy: [{ type: String }], // ✅ email array
+    dislikedBy: [{ type: String }], // ✅ email array
     responses: [responseSchema],
   },
   { timestamps: true }
