@@ -183,7 +183,6 @@ const increaseCartQuantity = async (req, res) => {
   }
 };
 
-
 const checkCartItem = async (req, res) => {
   const { email, productId } = req.query;
 
@@ -201,6 +200,35 @@ const checkCartItem = async (req, res) => {
   }
 };
 
+const bulkRemoveFromCart = async (req, res) => {
+  const { productIds, email } = req.body;
+
+  if (!Array.isArray(productIds) || productIds.length === 0 || !email) {
+    return res.status(400).json({ message: "Product IDs and Email are required" });
+  }
+
+  try {
+    const user = await UserCart.findOneAndUpdate(
+      { email },
+      {
+        $pull: {
+          cart: {
+            productId: { $in: productIds },
+          },
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Selected items removed from cart", cart: user?.cart || [] });
+  } catch (error) {
+    console.error("Error bulk removing from cart:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+
 module.exports = {
   addToCart,
   removeFromCart,
@@ -209,4 +237,5 @@ module.exports = {
   getUserCartWishlist,
   increaseCartQuantity,
   checkCartItem,
+  bulkRemoveFromCart
 };
