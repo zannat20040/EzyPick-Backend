@@ -19,11 +19,15 @@ const orderItemSchema = new mongoose.Schema({
     required: true,
     default: 1, // ✅ Important
   },
+  status: {
+    type: String,
+    default: "pending", // ✅ each product starts as pending
+    enum: ["pending", "accepted", "rejected"],
+  },
   buyerName: String,
   buyerPhone: String,
   buyerAddress: String,
 });
-
 
 const orderSchema = new mongoose.Schema(
   {
@@ -39,7 +43,8 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    buyerEmail: { // ✅ Add this
+    buyerEmail: {
+      // ✅ Add this
       type: String,
       required: true,
     },
@@ -51,6 +56,5 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

@@ -4,10 +4,10 @@ const {
   placeOrder,
   getAllOrders,
   getOrderById,
-  updateOrder,
   deleteOrder,
   getOrdersByUserEmail,
-  getOrdersBySellerEmail
+  getOrdersBySellerEmail,
+  updateOrderItemStatus
 } = require("../controllers/orderController");
 
 // Place a new order
@@ -20,7 +20,7 @@ router.get("/orders", getAllOrders);
 router.get("/orders/:id", getOrderById);
 
 // Update an order (e.g., change status)
-router.patch("/orders/:id", updateOrder);
+router.patch("/orders/item/status", updateOrderItemStatus);
 
 // Delete an order
 router.delete("/orders/:id", deleteOrder);

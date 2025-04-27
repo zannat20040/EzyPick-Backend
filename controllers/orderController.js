@@ -1,11 +1,21 @@
 const Order = require("../models/orderModel");
+const Product = require("../models/product");
 
 // ✅ Place a New Order
 const placeOrder = async (req, res) => {
-  const { name, phone, address,email, items } = req.body;
+  const { name, phone, address, email, items } = req.body;
 
-  if (!name || !phone || !address || !items || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ message: "Missing required fields or items" });
+  if (
+    !name ||
+    !phone ||
+    !address ||
+    !items ||
+    !Array.isArray(items) ||
+    items.length === 0
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Missing required fields or items" });
   }
 
   try {
@@ -28,7 +38,9 @@ const placeOrder = async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    res.status(201).json({ message: "Order placed successfully", order: savedOrder });
+    res
+      .status(201)
+      .json({ message: "Order placed successfully", order: savedOrder });
   } catch (err) {
     console.error("Order placement error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
@@ -38,7 +50,9 @@ const placeOrder = async (req, res) => {
 // ✅ Get All Orders
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 }).populate("items.productId");
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate("items.productId");
     res.status(200).json(orders);
   } catch (err) {
     console.error("Error fetching orders:", err);
@@ -63,26 +77,39 @@ const getOrderById = async (req, res) => {
 };
 
 // ✅ Update an Order (status or details)
-const updateOrder = async (req, res) => {
-  const { id } = req.params;
-  const { status, buyerName, buyerPhone, buyerAddress } = req.body;
+const updateOrderItemStatus = async (req, res) => {
+  const { orderId, itemId, status } = req.body;
 
   try {
-    const order = await Order.findById(id);
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+    const order = await Order.findById(orderId).populate("items.productId"); // ✅ populate product
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Find the item inside the order
+    const item = order.items.id(itemId);
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    item.status = status;
+
+    // ✅ If status = accepted, then reduce product stock
+    if (status === "accepted") {
+      const product = await Product.findById(item.productId._id); // ✅ find the real product
+
+      if (product) {
+        if (product.stock >= item.quantity) {
+          product.stock -= item.quantity; // ✅ reduce stock by quantity
+          await product.save();
+        } else {
+          return res.status(400).json({ message: "Not enough stock to accept the order" });
+        }
+      }
     }
 
-    if (status) order.status = status;
-    if (buyerName) order.buyerName = buyerName;
-    if (buyerPhone) order.buyerPhone = buyerPhone;
-    if (buyerAddress) order.buyerAddress = buyerAddress;
+    await order.save();
 
-    const updatedOrder = await order.save();
-    res.status(200).json({ message: "Order updated", order: updatedOrder });
-  } catch (err) {
-    console.error("Error updating order:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(200).json({ message: "Item status updated", order });
+  } catch (error) {
+    console.error("Error updating item status:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -109,7 +136,9 @@ const getOrdersByUserEmail = async (req, res) => {
   const { email } = req.params;
 
   try {
-    const orders = await Order.find({ buyerEmail: email }).populate("items.productId");
+    const orders = await Order.find({ buyerEmail: email }).populate(
+      "items.productId"
+    );
     res.status(200).json({ orders });
   } catch (error) {
     console.error("Error fetching user orders:", error);
@@ -136,15 +165,12 @@ const getOrdersBySellerEmail = async (req, res) => {
   }
 };
 
-
-
-
 module.exports = {
   placeOrder,
   getAllOrders,
   getOrderById,
-  updateOrder,
+  updateOrderItemStatus,
   deleteOrder,
   getOrdersByUserEmail,
-  getOrdersBySellerEmail
+  getOrdersBySellerEmail,
 };
