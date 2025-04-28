@@ -20,7 +20,7 @@ async function syncProducts() {
 
     // 3. Prepare products for Meilisearch
     const formattedProducts = products.map((product) => ({
-      id: product._id, 
+      id: product._id,
       name: product.name,
       description: product.description,
       price: product.price,
@@ -41,6 +41,7 @@ async function syncProducts() {
       {
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.MEILISEARCH_API_KEY}`, // Add the API key here
         },
       }
     );
