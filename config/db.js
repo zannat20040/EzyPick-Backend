@@ -1,22 +1,38 @@
-const mongoose = require("mongoose");
 require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const app = express();
+const connectDB = require("./config/db");
+const userRoutes = require("./routes/userRoutes");
+const deliveryOptionRoutes = require("./routes/deliveryOptionRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
+app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",  // You may need to update this URL for production
+    methods: "GET,POST,PUT,DELETE,PATCH",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hdmaj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// Use routes
+app.use("/api/users", userRoutes);
+app.use("/api", deliveryOptionRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/product", productRoutes);
+app.use("/api/user-cart", cartRoutes);
+app.use("/api", orderRoutes);
+app.use("/api", reviewRoutes);
+app.use("/api/products", aiRoutes);
 
-// const uri = mongodb+srv://shanzidadisha1234:<db_password>@cluster0.hdmaj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-const clientOptions = {
-  serverApi: { version: "1", strict: true, deprecationErrors: true },
-};
+// Connect to MongoDB
+connectDB();
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect(uri, clientOptions);
-    console.log("Successfully connected to MongoDB!");
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    process.exit(1); // Exit the process with failure
-  }
-};
-
-module.exports = connectDB;
+// For Vercel, export the app instead of using app.listen()
+module.exports = app;
