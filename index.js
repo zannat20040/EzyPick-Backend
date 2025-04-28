@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://next-ezypick.vercel.app/",
+      "https://next-ezypick.vercel.app",
       "https://ms-fc8c86cde65a-22389.nyc.meilisearch.io", // Meilisearch cloud URL
     ],
     methods: "GET,POST,PUT,DELETE,PATCH",
