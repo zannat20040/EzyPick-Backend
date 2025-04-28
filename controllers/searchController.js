@@ -9,6 +9,12 @@ const searchProducts = async (req, res) => {
       `${process.env.MEILISEARCH_HOST}/indexes/products/search`,
       {
         q: query,
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${process.env.MEILISEARCH_API_KEY}`, // Add Authorization header with API key
+          "Content-Type": "application/json", // Ensure content type is set to JSON
+        },
       }
     );
 
