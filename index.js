@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const connectDB = require("./config/db");
-const PORT = process.env.PORT || 5000;
 const userRoutes = require("./routes/userRoutes");
 const deliveryOptionRoutes = require("./routes/deliveryOptionRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -16,13 +15,13 @@ const aiRoutes = require("./routes/aiRoutes");
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3000",  // You may need to update this URL for production
     methods: "GET,POST,PUT,DELETE,PATCH",
     allowedHeaders: "Content-Type,Authorization",
   })
 );
 
-// Use user routes
+// Use routes
 app.use("/api/users", userRoutes);
 app.use("/api", deliveryOptionRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -32,17 +31,13 @@ app.use("/api", orderRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api/products", aiRoutes);
 
-// Connect to MongoDB and start server
-const startServer = async () => {
-  await connectDB();
 
-  app.get("/", (req, res) => {
-    res.send("Hello World!");
-  });
+// Root route to show a message
+app.get("/", (req, res) => {
+  res.send("Welcome to the API! The server is running successfully.");
+});
+// Connect to MongoDB
+connectDB();
 
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-};
-
-startServer();
+// For Vercel, export the app instead of using app.listen()
+module.exports = app;
