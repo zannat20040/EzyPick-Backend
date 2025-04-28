@@ -20,7 +20,7 @@ async function syncProducts() {
 
     // 3. Prepare products for Meilisearch
     const formattedProducts = products.map((product) => ({
-      id: product._id,
+      id: product._id, 
       name: product.name,
       description: product.description,
       price: product.price,
@@ -31,6 +31,7 @@ async function syncProducts() {
       subcategory: product.category?.subcategory,
       sellerName: product.sellerName,
       rating: product.rating,
+      reviews: product.reviews,
     }));
 
     // 4. Push products to Meilisearch

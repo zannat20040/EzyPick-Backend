@@ -52,20 +52,23 @@ const addNewProduct = async (req, res) => {
     await product.save();
 
     // ✅ NEW: Also push to Meilisearch
-    await axios.post(`${process.env.MEILISEARCH_HOST}/indexes/products/documents`, [
-      {
-        id: product._id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        discount: product.discount,
-        thumbnail: product.thumbnail,
-        category: product.category?.title,
-        subcategory: product.category?.subcategory,
-        sellerName: product.sellerName,
-        rating: product.rating,
-      }
-    ]);
+    await axios.post(
+      `${process.env.MEILISEARCH_HOST}/indexes/products/documents`,
+      [
+        {
+          id: product._id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          discount: product.discount,
+          thumbnail: product.thumbnail,
+          category: product.category?.title,
+          subcategory: product.category?.subcategory,
+          sellerName: product.sellerName,
+          rating: product.rating,
+        },
+      ]
+    );
 
     res.status(201).json({ message: "Product created successfully", product });
   } catch (err) {
@@ -117,27 +120,32 @@ const updateProduct = async (req, res) => {
     const { id } = req.params;
     const updateFields = req.body;
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    });
 
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
 
     // ✅ NEW: Also update Meilisearch
-    await axios.post(`${process.env.MEILISEARCH_HOST}/indexes/products/documents`, [
-      {
-        id: updatedProduct._id,
-        name: updatedProduct.name,
-        description: updatedProduct.description,
-        price: updatedProduct.price,
-        discount: updatedProduct.discount,
-        thumbnail: updatedProduct.thumbnail,
-        category: updatedProduct.category?.title,
-        subcategory: updatedProduct.category?.subcategory,
-        sellerName: updatedProduct.sellerName,
-        rating: updatedProduct.rating,
-      }
-    ]);
+    await axios.post(
+      `${process.env.MEILISEARCH_HOST}/indexes/products/documents`,
+      [
+        {
+          id: updatedProduct._id,
+          name: updatedProduct.name,
+          description: updatedProduct.description,
+          price: updatedProduct.price,
+          discount: updatedProduct.discount,
+          thumbnail: updatedProduct.thumbnail,
+          category: updatedProduct.category?.title,
+          subcategory: updatedProduct.category?.subcategory,
+          sellerName: updatedProduct.sellerName,
+          rating: updatedProduct.rating,
+        },
+      ]
+    );
 
     res.status(200).json({
       message: "Product updated successfully",
@@ -171,7 +179,9 @@ const deleteProduct = async (req, res) => {
     }
 
     // ✅ NEW: Also delete from Meilisearch
-    await axios.delete(`${process.env.MEILISEARCH_HOST}/indexes/products/documents/${productId}`);
+    await axios.delete(
+      `${process.env.MEILISEARCH_HOST}/indexes/products/documents/${productId}`
+    );
 
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
@@ -199,6 +209,52 @@ const getProductsByCategory = async (req, res) => {
   }
 };
 
+const recommendProducts = async (req, res) => {
+  const { category, subcategory, price, productId } = req.body;
+
+  try {
+    const filters = [];
+    if (category) filters.push(`category = "${category}"`);
+    if (subcategory) filters.push(`subcategory = "${subcategory}"`);
+
+    const meiliResponse = await axios.post(
+      `${process.env.MEILISEARCH_HOST}/indexes/products/search`,
+      {
+        filter: filters.length > 0 ? filters : undefined,
+        limit: 50, // Fetch more products to sort properly
+      }
+    );
+
+    console.log("Meilisearch response:", meiliResponse.data.hits);
+
+    let recommended = meiliResponse.data.hits.filter((p) => p.id !== productId);
+
+    // ✅ Smart sorting
+    recommended = recommended.sort((a, b) => {
+      if ((b.rating || 0) !== (a.rating || 0)) {
+        return (b.rating || 0) - (a.rating || 0); // Higher rating first
+      }
+      if ((b.reviews || 0) !== (a.reviews || 0)) {
+        return (b.reviews || 0) - (a.reviews || 0); // Higher reviews next
+      }
+      if ((b.discount || 0) !== (a.discount || 0)) {
+        return (b.discount || 0) - (a.discount || 0); // Higher discount next
+      }
+      return 0;
+    });
+
+    // ✅ Price ±500 range
+    recommended = recommended.filter((p) => Math.abs(p.price - price) <= 500);
+
+    res.json(recommended.slice(0, 10)); // Top 10 recommendations
+  } catch (error) {
+    console.error("Recommendation error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Recommendation failed" });
+  }
+};
+
+
+
 module.exports = {
   addNewProduct,
   getProductsWithOffers,
@@ -208,4 +264,5 @@ module.exports = {
   getProductsByUser,
   deleteProduct,
   getProductsByCategory,
+  recommendProducts,
 };

@@ -11,7 +11,7 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
-const searchRoutes = require("./routes/searchRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 app.use(express.json());
 app.use(
@@ -30,7 +30,7 @@ app.use("/api/product", productRoutes);
 app.use("/api/user-cart", cartRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", reviewRoutes);
-app.use("/api/products", searchRoutes);
+app.use("/api/products", aiRoutes);
 
 // Connect to MongoDB and start server
 const startServer = async () => {
