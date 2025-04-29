@@ -67,13 +67,18 @@ const addNewProduct = async (req, res) => {
           sellerName: product.sellerName,
           rating: product.rating,
         },
-      ]
+      ],
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.MEILISEARCH_API_KEY}`, // ✅ Add this
+        },
+      }
     );
 
     res.status(201).json({ message: "Product created successfully", product });
   } catch (err) {
     console.error("Error adding product:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error || "Server error" });
   }
 };
 
@@ -144,7 +149,12 @@ const updateProduct = async (req, res) => {
           sellerName: updatedProduct.sellerName,
           rating: updatedProduct.rating,
         },
-      ]
+      ],
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.MEILISEARCH_API_KEY}`, // ✅ Add this
+        },
+      }
     );
 
     res.status(200).json({
@@ -152,8 +162,9 @@ const updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
+    console.log(error);
     console.error("Error updating product:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error || "Server error" });
   }
 };
 
@@ -180,13 +191,18 @@ const deleteProduct = async (req, res) => {
 
     // ✅ NEW: Also delete from Meilisearch
     await axios.delete(
-      `${process.env.MEILISEARCH_HOST}/indexes/products/documents/${productId}`
+      `${process.env.MEILISEARCH_HOST}/indexes/products/documents/${productId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.MEILISEARCH_API_KEY}`,
+        },
+      }
     );
 
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error || "Server error" });
   }
 };
 
@@ -248,12 +264,13 @@ const recommendProducts = async (req, res) => {
 
     res.json(recommended.slice(0, 10)); // Top 10 recommendations
   } catch (error) {
-    console.error("Recommendation error:", error.response?.data || error.message);
+    console.error(
+      "Recommendation error:",
+      error.response?.data || error.message
+    );
     res.status(500).json({ error: "Recommendation failed" });
   }
 };
-
-
 
 module.exports = {
   addNewProduct,
