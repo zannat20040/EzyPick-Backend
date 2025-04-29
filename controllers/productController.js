@@ -162,7 +162,6 @@ const updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    console.log(error);
     console.error("Error updating product:", error);
     res.status(500).json({ message: error || "Server error" });
   }
@@ -245,8 +244,6 @@ const recommendProducts = async (req, res) => {
         },
       }
     );
-
-    console.log("Meilisearch response:", meiliResponse.data.hits);
 
     let recommended = meiliResponse.data.hits.filter((p) => p.id !== productId);
 
