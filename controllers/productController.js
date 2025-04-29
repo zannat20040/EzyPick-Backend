@@ -238,6 +238,11 @@ const recommendProducts = async (req, res) => {
       {
         filter: filters.length > 0 ? filters : undefined,
         limit: 50, // Fetch more products to sort properly
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.MEILISEARCH_API_KEY}`,
+        },
       }
     );
 
