@@ -53,8 +53,8 @@ const addSubcategory = async (req, res) => {
 // 📤 Get all categories
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
-    res.status(200).json(  categories );
+    const categories = await Category.find().sort({ createdAt: -1 });
+    res.status(200).json(categories);
   } catch (err) {
     res
       .status(500)
@@ -100,7 +100,7 @@ const updateCategoryThumbnail = async (req, res) => {
 
     res.status(200).json({
       message: "Thumbnail updated successfully.",
-      category: updatedCategory
+      category: updatedCategory,
     });
   } catch (error) {
     console.error("Error updating category thumbnail:", error);
@@ -108,11 +108,10 @@ const updateCategoryThumbnail = async (req, res) => {
   }
 };
 
-
 module.exports = {
   addCategory,
   addSubcategory,
   getAllCategories,
   getSubcategoriesByCategory,
-  updateCategoryThumbnail
+  updateCategoryThumbnail,
 };

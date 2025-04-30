@@ -86,7 +86,7 @@ const getProductsWithOffers = async (req, res) => {
   try {
     const products = await Product.find({
       offer: { $ne: "" },
-    });
+    }).sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (err) {
     console.error("Error fetching offer products:", err);
@@ -96,7 +96,9 @@ const getProductsWithOffers = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category"); // Optional: populate category details
+    const products = await Product.find()
+      .populate("category")
+      .sort({ createdAt: -1 }); // Optional: populate category details
     res.status(200).json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
