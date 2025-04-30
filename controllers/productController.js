@@ -170,7 +170,9 @@ const updateProduct = async (req, res) => {
 const getProductsByUser = async (req, res) => {
   try {
     const { email } = req.params;
-    const products = await Product.find({ postedBy: email });
+    const products = await Product.find({ postedBy: email }).sort({
+      createdAt: -1,
+    });
     res.status(200).json(products);
   } catch (err) {
     console.error("Error fetching user's products:", err);

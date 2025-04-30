@@ -1,4 +1,4 @@
-const UserInteraction = require("../models/UserInteraction");
+const UserInteraction = require("../models/userInteraction");
 const Product = require("../models/product");
 const OpenAI = require("openai");
 

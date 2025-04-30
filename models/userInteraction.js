@@ -34,6 +34,6 @@ const UserInteractionSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
-
+module.exports =
+  mongoose.models.UserInteraction ||
   mongoose.model("UserInteraction", UserInteractionSchema);
-  
