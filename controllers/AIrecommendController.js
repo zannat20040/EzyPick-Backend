@@ -7,7 +7,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-const recommendProducts = async (req, res) => {
+const AIrecommendProducts = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -28,21 +28,24 @@ const recommendProducts = async (req, res) => {
       subcategory: p.category.subcategory,
       price: p.price,
       description: p.description,
-      seller:p.sellerName
+      seller: p.sellerName,
     }));
 
     const prompt = `
-You are a product recommendation engine.
-
-Your task:
-- Analyze the user's behavior (clicks, searches, wishlist, cart, purchases)
-- Match this behavior to the product catalog
-- Recommend the 20 most relevant product IDs based on the user's interests.
-
-⚠️ VERY IMPORTANT:
-- Only return a clean JSON array of 20 product IDs (from the catalog below).
-- No explanations. No formatting. No text. Only JSON array like: ["id1", "id2", ...]
-`.trim();
+    You are a product recommendation engine.
+    
+    Your task:
+    - Analyze the user's behavior data (clicks, searches, wishlist, cart, purchases).
+    - Match this behavior to the product catalog provided.
+    - Recommend 20 product IDs that are most relevant to the user's preferences and interests.
+    
+    ⚠️ VERY IMPORTANT:
+    - DO NOT recommend any products that are already in the user's purchases, wishlist, or cart.
+    - Only choose from products not previously interacted with in those categories.
+    - Your response MUST be a clean JSON array of 20 unique product IDs from the given catalog.
+    - No explanations. No formatting. No text. Only the JSON array like:
+    ["id1", "id2", ..., "id20"]
+    `.trim();
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -57,12 +60,9 @@ Your task:
       temperature: 0.7,
     });
 
-
     const raw = completion.choices?.[0]?.message?.content?.trim();
     const recommendations = JSON.parse(raw);
 
-    console.log("result:", completion.choices?.[0]?.message?.content);
-    console.log("Recommendations:", recommendations);
 
     res.status(200).json({ recommendations }); // return only product IDs
   } catch (err) {
@@ -71,4 +71,4 @@ Your task:
   }
 };
 
-module.exports = { recommendProducts };
+module.exports = { AIrecommendProducts };
